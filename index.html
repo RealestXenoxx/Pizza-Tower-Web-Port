@@ -138,72 +138,87 @@
             border: 1px solid rgba(255,255,255,0.08);
         }
 
-        /* === PIZZA-STYLE LOADING BAR === */
         .loading-bar-container {
             position: relative;
             width: 100%;
-            height: 24px;
-            padding: 3px;
+            height: 30px;
+            padding: 4px;
             border-radius: 999px;
-            /* Golden baked crust */
-            background:
-                linear-gradient(180deg, #e8b472 0%, #d19a52 35%, #b07a35 70%, #8b5a2b 100%);
+            background: linear-gradient(180deg, #8f431a 0%, #d98738 19%, #f4c37d 42%, #a94e1d 69%, #67250f 100%);
             box-shadow:
-                inset 0 2px 4px rgba(0,0,0,0.45),
-                inset 0 -2px 4px rgba(255,220,160,0.25),
-                0 0 0 2px #7c4a1e,
-                0 0 0 3px rgba(255,220,160,0.15),
-                0 6px 18px rgba(0,0,0,0.55);
+                inset 0 2px 3px rgba(70, 22, 6, 0.72),
+                inset 0 -2px 3px rgba(255, 236, 190, 0.35),
+                0 0 0 2px #582009,
+                0 0 0 4px rgba(255, 204, 120, 0.18),
+                0 8px 22px rgba(0, 0, 0, 0.55);
             overflow: hidden;
+        }
+
+        .loading-bar-container::before {
+            content: '';
+            position: absolute;
+            z-index: 2;
+            inset: 2px 4px auto;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(255, 237, 181, 0.48);
+            pointer-events: none;
         }
 
         .loading-bar {
             position: relative;
             width: 0%;
             height: 100%;
+            min-width: 0;
             border-radius: 999px;
-            /* Cheese + sauce base */
-            background-color: #fbbf24;
-            /* Pepperoni dots (repeating) over cheese gradient */
+            background-color: #f8b51e;
             background-image:
-                radial-gradient(circle at 12% 50%, #b91c1c 0 4.5px, #7f1010 5px, transparent 6px),
-                radial-gradient(circle at 38% 30%, #b91c1c 0 4px, #7f1010 4.5px, transparent 5.5px),
-                radial-gradient(circle at 62% 68%, #b91c1c 0 5px, #7f1010 5.5px, transparent 6.5px),
-                radial-gradient(circle at 88% 40%, #b91c1c 0 4px, #7f1010 4.5px, transparent 5.5px),
-                linear-gradient(180deg, #fde68a 0%, #fbbf24 45%, #f59e0b 100%);
+                radial-gradient(ellipse at 8% 82%, rgba(190, 76, 11, 0.62) 0 1px, transparent 2.2px),
+                radial-gradient(ellipse at 27% 20%, rgba(190, 76, 11, 0.52) 0 1px, transparent 2px),
+                radial-gradient(ellipse at 54% 76%, rgba(190, 76, 11, 0.6) 0 1px, transparent 2px),
+                radial-gradient(ellipse at 82% 18%, rgba(190, 76, 11, 0.54) 0 1px, transparent 2px),
+                radial-gradient(circle at 15px 9px, #e84932 0 4px, #a71916 4.4px 5.4px, transparent 5.8px),
+                radial-gradient(circle at 42px 18px, #e84932 0 4px, #a71916 4.4px 5.4px, transparent 5.8px),
+                radial-gradient(circle at 69px 8px, #e84932 0 4px, #a71916 4.4px 5.4px, transparent 5.8px),
+                linear-gradient(180deg, #ffe68e 0%, #ffd13d 36%, #f5a313 72%, #d8760d 100%);
             background-size:
-                55px 100%, 55px 100%, 55px 100%, 55px 100%, 100% 100%;
-            background-repeat:
-                repeat-x, repeat-x, repeat-x, repeat-x, no-repeat;
-            background-position:
-                0 0, 18px 0, 6px 0, 30px 0, 0 0;
+                82px 22px, 82px 22px, 82px 22px, 82px 22px,
+                82px 22px, 82px 22px, 82px 22px,
+                100% 100%;
+            background-repeat: repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, no-repeat;
+            background-position: 0 0, 10px 0, 25px 0, 44px 0, 0 0, 0 0, 0 0, 0 0;
             transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
             box-shadow:
-                inset 0 2px 3px rgba(255,255,255,0.45),
-                inset 0 -3px 5px rgba(180,60,0,0.35);
+                inset 0 2px 2px rgba(255, 255, 255, 0.58),
+                inset 0 -3px 4px rgba(142, 50, 5, 0.34),
+                2px 0 4px rgba(91, 28, 5, 0.38);
             overflow: hidden;
         }
 
-        /* Cheese shimmer */
+        .loading-bar::before {
+            content: '';
+            position: absolute;
+            inset: 3px 8px auto;
+            height: 4px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.58), rgba(255,255,255,0.06));
+            opacity: 0.8;
+        }
+
         .loading-bar::after {
             content: '';
             position: absolute;
             inset: 0;
             border-radius: 999px;
-            background: linear-gradient(90deg,
-                transparent 0%,
-                rgba(255,255,255,0.10) 25%,
-                rgba(255,255,255,0.55) 50%,
-                rgba(255,255,255,0.10) 75%,
-                transparent 100%);
-            background-size: 300% 100%;
-            animation: cheese-shimmer 2.2s ease-in-out infinite;
+            background: linear-gradient(105deg, transparent 28%, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.52) 50%, rgba(255,255,255,0.1) 60%, transparent 72%);
+            transform: translateX(-120%);
+            animation: cheese-shimmer 2.4s ease-in-out infinite;
             pointer-events: none;
         }
 
         @keyframes cheese-shimmer {
-            0%   { background-position: -150% 0; }
-            100% { background-position: 250% 0; }
+            0%, 28% { transform: translateX(-120%); }
+            72%, 100% { transform: translateX(120%); }
         }
 
         .status-row {
@@ -260,7 +275,6 @@
             50% { opacity: 1; transform: scale(1.2); }
         }
 
-        /* Hide Emscripten's native loader visually but keep in DOM */
         .loading { display: none !important; }
     </style>
 </head>
@@ -277,14 +291,12 @@
         </div>
     </div>
 
-    <!-- Emscripten needs these elements to exist even if hidden -->
     <div class="loading">
         <div class="spinner" id="spinner"></div>
         <div class="emscripten" id="status">Downloading...</div>
         <progress value="0" max="100" id="progress" hidden="1"></progress>
     </div>
 
-    <!-- Custom loading screen -->
     <div id="loading-screen">
         <div class="bg-layer" id="bg"></div>
 
@@ -325,7 +337,6 @@
     </div>
 
     <script>
-        // === Custom loading screen controller ===
         (function () {
             var BACKGROUNDS = [
                 "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2231450/capsule_616x353.jpg?t=1732516978",
@@ -357,7 +368,6 @@
 
             function setProgress(percent) {
                 percent = Math.max(0, Math.min(100, percent));
-                // Never go backwards — prevents the bar jolting back and forth
                 if (percent < lastPercent) percent = lastPercent;
                 lastPercent = percent;
 
@@ -393,7 +403,6 @@
     </script>
 
     <script>
-        // === File merging + real progress tracking ===
         (function () {
             var TOTAL_PARTS = 13;
             var partsData = [];
@@ -425,7 +434,6 @@
 
             function loadPart(index) {
                 if (index >= TOTAL_PARTS) {
-                    // All downloaded — merge and start game
                     var mergedBlob = new Blob(partsData);
                     window.gameUnxUrl = URL.createObjectURL(mergedBlob);
                     window.__pizzaLoading.setText("Starting game…");
@@ -434,7 +442,6 @@
                 }
 
                 fetchWithProgress("game.unx.part" + (index + 1), function (partFraction) {
-                    // Progress based on how far into the current part we are
                     var overall = ((index + partFraction) / TOTAL_PARTS) * 100;
                     window.__pizzaLoading.setProgress(overall);
                     window.__pizzaLoading.setText(
@@ -454,7 +461,6 @@
             }
 
             function installHooksAndStart() {
-                // Intercept game.unx fetches and serve the merged blob
                 var originalFetch = window.fetch;
                 window.fetch = async function (...args) {
                     var url = args[0];
@@ -475,7 +481,6 @@
                     return originalOpen.call(this, method, url, ...rest);
                 };
 
-                // Load the game scripts
                 var indexScript = document.createElement("script");
                 indexScript.src = "index.js";
                 document.body.appendChild(indexScript);
@@ -495,7 +500,6 @@
                     window.__pizzaLoading.finish();
                 }
 
-                // Watch Emscripten's status element for "Running" or similar
                 var statusEl = document.getElementById('status');
                 if (statusEl) {
                     var observer = new MutationObserver(function () {
@@ -507,7 +511,6 @@
                     observer.observe(statusEl, { childList: true, characterData: true, subtree: true });
                 }
 
-                // Watch for Module.calledRun (Emscripten runtime flag)
                 var readyCheck = setInterval(function () {
                     if (window.Module && window.Module.calledRun) {
                         clearInterval(readyCheck);
@@ -515,15 +518,12 @@
                     }
                 }, 300);
 
-                // Watch for the canvas actually rendering (WebGL context active)
                 var canvasCheck = setInterval(function () {
                     var c = document.getElementById('canvas');
                     if (c && (c.width > 0 && c.height > 0) && c.getContext) {
-                        // Check if a context exists
                         try {
                             var gl = c.getContext('webgl') || c.getContext('webgl2') || c.getContext('2d');
                             if (gl) {
-                                // Wait a moment for rendering to begin
                                 clearInterval(canvasCheck);
                                 setTimeout(markReady, 1500);
                             }
@@ -531,7 +531,6 @@
                     }
                 }, 400);
 
-                // Hard fallback: always finish after 25 seconds so user isn't stuck
                 setTimeout(function () {
                     clearInterval(readyCheck);
                     clearInterval(canvasCheck);
@@ -544,7 +543,6 @@
     </script>
 
     <script>
-        // === Force tab title ===
         (function () {
             var DESIRED_TITLE = "Pizza Tower";
             var titleEl = document.querySelector('title');
