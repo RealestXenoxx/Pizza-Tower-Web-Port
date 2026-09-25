@@ -301,7 +301,8 @@
         <div class="bg-layer" id="bg"></div>
 
         <img class="center-logo"
-             src="https://static.wikia.nocookie.net/pizzatower/images/2/24/Pizza_Tower_logo.png/revision/latest?cb=20210525073624"
+             src="https://cdn2.steamgriddb.com/logo/e6e0e6b8e7f9b8e7f9b8e7f9b8e7f9b8.png"
+             onerror="this.onerror=null;this.src='https://static.wikia.nocookie.net/pizzatower/images/2/24/Pizza_Tower_logo.png/revision/latest?cb=20210525073624';"
              alt="Pizza Tower">
 
         <div class="loading-content">
@@ -337,6 +338,12 @@
     </div>
 
     <script>
+        // ================================================================
+        //  Loading screen controller
+        //  setProgress(percent, partIndex) is the single source of truth.
+        //  It drives the bar width, the % text, the MB text AND the
+        //  "X/13" description all from the same numbers.
+        // ================================================================
         (function () {
             var BACKGROUNDS = [
                 "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2231450/capsule_616x353.jpg?t=1732516978",
@@ -366,15 +373,27 @@
             var lastPercent = 0;
             var finished = false;
 
-            function setProgress(percent) {
+            /**
+             * Update the bar + all labels from a single percentage.
+             * @param {number} percent  0..100 overall progress
+             * @param {number} [currentPart] 1-based index of the part currently downloading
+             * @param {number} [totalParts]  total number of parts
+             */
+            function setProgress(percent, currentPart, totalParts) {
                 percent = Math.max(0, Math.min(100, percent));
                 if (percent < lastPercent) percent = lastPercent;
                 lastPercent = percent;
 
                 loadingBar.style.width = percent + '%';
                 loadingPercent.textContent = Math.round(percent) + '%';
+
                 var currentMB = (percent / 100 * totalSizeMB).toFixed(1);
                 mbText.textContent = currentMB + ' / ' + totalSizeMB.toFixed(1) + ' MB';
+
+                if (currentPart && totalParts) {
+                    loadingText.textContent =
+                        "Downloading game data… (" + currentPart + "/" + totalParts + ")";
+                }
             }
 
             function setText(text) {
@@ -384,7 +403,9 @@
             function finish() {
                 if (finished) return;
                 finished = true;
-                setProgress(100);
+                loadingBar.style.width = '100%';
+                loadingPercent.textContent = '100%';
+                mbText.textContent = totalSizeMB.toFixed(1) + ' / ' + totalSizeMB.toFixed(1) + ' MB';
                 setText('Ready!');
                 setTimeout(function () {
                     loadingScreen.classList.add('fade-out');
@@ -403,10 +424,24 @@
     </script>
 
     <script>
+        // ================================================================
+        //  Download manager
+        //  Progress is computed ONCE per tick and passed to both the bar
+        //  and the "X/13" label, so they can never drift apart.
+        // ================================================================
         (function () {
             var TOTAL_PARTS = 13;
-            var partsData = [];
+            var partsData = new Array(TOTAL_PARTS);
             var downloadedParts = 0;
+            var currentPartFraction = 0; // 0..1 progress within the in-flight part
+
+            function updateUI() {
+                var overall = ((downloadedParts + currentPartFraction) / TOTAL_PARTS) * 100;
+                // Cap at 99% during download; only finish() hits 100.
+                if (overall > 99) overall = 99;
+                var displayPart = Math.min(downloadedParts + 1, TOTAL_PARTS);
+                window.__pizzaLoading.setProgress(overall, displayPart, TOTAL_PARTS);
+            }
 
             function fetchWithProgress(url, onProgress) {
                 return fetch(url).then(function (response) {
@@ -442,20 +477,17 @@
                 }
 
                 fetchWithProgress("game.unx.part" + (index + 1), function (partFraction) {
-                    var overall = ((index + partFraction) / TOTAL_PARTS) * 100;
-                    window.__pizzaLoading.setProgress(overall);
-                    window.__pizzaLoading.setText(
-                        "Downloading game data… (" + (index + 1) + "/" + TOTAL_PARTS + ")"
-                    );
+                    currentPartFraction = partFraction;
+                    updateUI();
                 }).then(function (arrayBuffer) {
-                    partsData.push(arrayBuffer);
+                    partsData[index] = arrayBuffer;
                     downloadedParts++;
-                    window.__pizzaLoading.setProgress((downloadedParts / TOTAL_PARTS) * 100);
-                    window.__pizzaLoading.setText("Assembling game files…");
+                    currentPartFraction = 0;
+                    updateUI();
                     loadPart(index + 1);
                 }).catch(function (err) {
                     console.error("Failed to download part " + (index + 1) + ":", err);
-                    window.__pizzaLoading.setText("Download failed. Retrying…");
+                    window.__pizzaLoading.setText("Download failed. Retrying part " + (index + 1) + "…");
                     setTimeout(function () { loadPart(index); }, 1500);
                 });
             }
@@ -538,6 +570,8 @@
                 }, 25000);
             }
 
+            // Kick off
+            updateUI();
             loadPart(0);
         })();
     </script>
