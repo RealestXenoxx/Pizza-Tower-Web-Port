@@ -6,16 +6,268 @@
     <meta charset="utf-8" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
-    <link rel="icon" type="x-icon" href="favicon.png">
+    <link rel="icon" type="image/png" href="https://cdn2.steamgriddb.com/icon/4532f03593699ffdfd5fc1b58540190e/32/512x512.png">
     <title>Pizza Tower</title>
     <link rel="stylesheet" href="index.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+        }
+
+        canvas {
+            height: 100%;
+            margin: auto;
+            padding: 0;
+            border: 0 none;
+            background-color: #000;
+            image-rendering: pixelated;
+            display: block;
+        }
+
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 48px;
+            z-index: 1000;
+            overflow: hidden;
+            transition: opacity 0.45s ease;
+        }
+
+        .bg-layer {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(10px) brightness(0.7);
+            transform: scale(1.08);
+        }
+
+        .center-logo {
+            position: absolute;
+            top: 32%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            width: min(460px, 70vw);
+            height: auto;
+            pointer-events: none;
+            user-select: none;
+            filter:
+                drop-shadow(0 8px 24px rgba(0, 0, 0, 0.75))
+                drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
+        }
+
+        #loading-screen.fade-out { opacity: 0; pointer-events: none; }
+        #loading-screen.hidden { display: none; }
+
+        .loading-content {
+            position: relative;
+            z-index: 2;
+            width: 90%;
+            max-width: 560px;
+            padding: 28px 30px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: rgba(16, 18, 26, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 24px;
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            box-shadow:
+                0 24px 60px rgba(0, 0, 0, 0.70),
+                0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+                0 2px 0 rgba(255, 255, 255, 0.05) inset;
+        }
+
+        .loading-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 12px;
+        }
+
+        .title-group { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+        .mini-favicon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+
+        .loading-title {
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .loading-mb {
+            color: rgba(255,255,255,0.85);
+            font-size: 12.5px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+            background: rgba(255,255,255,0.06);
+            padding: 4px 12px;
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* === PIZZA-STYLE LOADING BAR === */
+        .loading-bar-container {
+            position: relative;
+            width: 100%;
+            height: 24px;
+            padding: 3px;
+            border-radius: 999px;
+            /* Golden baked crust */
+            background:
+                linear-gradient(180deg, #e8b472 0%, #d19a52 35%, #b07a35 70%, #8b5a2b 100%);
+            box-shadow:
+                inset 0 2px 4px rgba(0,0,0,0.45),
+                inset 0 -2px 4px rgba(255,220,160,0.25),
+                0 0 0 2px #7c4a1e,
+                0 0 0 3px rgba(255,220,160,0.15),
+                0 6px 18px rgba(0,0,0,0.55);
+            overflow: hidden;
+        }
+
+        .loading-bar {
+            position: relative;
+            width: 0%;
+            height: 100%;
+            border-radius: 999px;
+            /* Cheese + sauce base */
+            background-color: #fbbf24;
+            /* Pepperoni dots (repeating) over cheese gradient */
+            background-image:
+                radial-gradient(circle at 12% 50%, #b91c1c 0 4.5px, #7f1010 5px, transparent 6px),
+                radial-gradient(circle at 38% 30%, #b91c1c 0 4px, #7f1010 4.5px, transparent 5.5px),
+                radial-gradient(circle at 62% 68%, #b91c1c 0 5px, #7f1010 5.5px, transparent 6.5px),
+                radial-gradient(circle at 88% 40%, #b91c1c 0 4px, #7f1010 4.5px, transparent 5.5px),
+                linear-gradient(180deg, #fde68a 0%, #fbbf24 45%, #f59e0b 100%);
+            background-size:
+                55px 100%, 55px 100%, 55px 100%, 55px 100%, 100% 100%;
+            background-repeat:
+                repeat-x, repeat-x, repeat-x, repeat-x, no-repeat;
+            background-position:
+                0 0, 18px 0, 6px 0, 30px 0, 0 0;
+            transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow:
+                inset 0 2px 3px rgba(255,255,255,0.45),
+                inset 0 -3px 5px rgba(180,60,0,0.35);
+            overflow: hidden;
+        }
+
+        /* Cheese shimmer */
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 999px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255,255,255,0.10) 25%,
+                rgba(255,255,255,0.55) 50%,
+                rgba(255,255,255,0.10) 75%,
+                transparent 100%);
+            background-size: 300% 100%;
+            animation: cheese-shimmer 2.2s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes cheese-shimmer {
+            0%   { background-position: -150% 0; }
+            100% { background-position: 250% 0; }
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 2px;
+        }
+
+        .loading-text {
+            font-size: 13px;
+            color: rgba(255,255,255,0.9);
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+            height: 1.2em;
+        }
+
+        .loading-percent {
+            font-size: 14px;
+            font-weight: 800;
+            color: #ffd27a;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 12px rgba(255,180,60,0.6), 0 2px 6px rgba(0,0,0,0.9);
+            background: rgba(255, 180, 60, 0.12);
+            padding: 4px 12px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 180, 60, 0.28);
+            line-height: 1;
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 2px;
+        }
+
+        .dot {
+            width: 5px;
+            height: 5px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            animation: dot-pulse 1.4s infinite ease-in-out;
+            box-shadow: 0 0 8px rgba(255,180,60,0.6), 0 0 2px rgba(0,0,0,0.9);
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.18s; }
+        .dot:nth-child(3) { animation-delay: 0.36s; }
+
+        @keyframes dot-pulse {
+            0%, 100% { opacity: 0.25; transform: scale(0.75); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Hide Emscripten's native loader visually but keep in DOM */
+        .loading { display: none !important; }
     </style>
 </head>
 
 <body>
-    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1">
-    </canvas>
+    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+
     <div id="pauseMenuContainer" hidden>
         <div id="pauseMenuBorder">
             <div id="pauseMenu">
@@ -24,103 +276,289 @@
             </div>
         </div>
     </div>
+
+    <!-- Emscripten needs these elements to exist even if hidden -->
     <div class="loading">
         <div class="spinner" id="spinner"></div>
         <div class="emscripten" id="status">Downloading...</div>
         <progress value="0" max="100" id="progress" hidden="1"></progress>
     </div>
-    <div class="output-container" id="output-container">
-        <div id="message-container">
-            <div id="messages">
+
+    <!-- Custom loading screen -->
+    <div id="loading-screen">
+        <div class="bg-layer" id="bg"></div>
+
+        <img class="center-logo"
+             src="https://static.wikia.nocookie.net/pizzatower/images/2/24/Pizza_Tower_logo.png/revision/latest?cb=20210525073624"
+             alt="Pizza Tower">
+
+        <div class="loading-content">
+            <div class="loading-header">
+                <div class="title-group">
+                    <img src="https://cdn2.steamgriddb.com/icon/4532f03593699ffdfd5fc1b58540190e/32/512x512.png" class="mini-favicon" alt="icon">
+                    <div class="loading-title">Pizza Tower</div>
+                </div>
+                <div class="loading-mb" id="mb-text">0.0 / 300.0 MB</div>
+            </div>
+
+            <div class="loading-bar-container">
+                <div class="loading-bar" id="loading-bar"></div>
+            </div>
+
+            <div class="status-row">
+                <div class="loading-text" id="loading-text">Initializing…</div>
+                <div class="loading-percent" id="loading-percent">0%</div>
+            </div>
+
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
             </div>
         </div>
-        <script>
-            function mergeFiles(fileParts) {
-                return new Promise((resolve, reject) => {
-                    let buffers = [];
+    </div>
 
-                    function fetchPart(index) {
-                        if (index >= fileParts.length) {
-                            let mergedBlob = new Blob(buffers);
-                            let mergedFileUrl = URL.createObjectURL(mergedBlob);
-                            resolve(mergedFileUrl);
-                            return;
-                        }
-                        fetch(fileParts[index]).then((response) => response.arrayBuffer()).then((data) => {
-                            buffers.push(data);
-                            fetchPart(index + 1);
-                        }).catch(reject);
+    <div class="output-container" id="output-container">
+        <div id="message-container">
+            <div id="messages"></div>
+        </div>
+    </div>
+
+    <script>
+        // === Custom loading screen controller ===
+        (function () {
+            var BACKGROUNDS = [
+                "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2231450/capsule_616x353.jpg?t=1732516978",
+                "https://wallpapers.com/images/featured/pizza-tower-c1jyf37k49u9e0z0.jpg",
+                "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5547f07d-3969-45bc-9290-31b57c6ae95c/dgzlunx-87d7c880-ebb3-483b-ba74-70b944a386fe.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi81NTQ3ZjA3ZC0zOTY5LTQ1YmMtOTI5MC0zMWI1N2M2YWU5NWMvZGd6bHVueC04N2Q3Yzg4MC1lYmIzLTQ4M2ItYmE3NC03MGI5NDRhMzg2ZmUucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.hiFWDMLZWZU2ywgGDVsleJzb1ICj2HasTkDUT6m6O1E"
+            ];
+
+            function pickBackground() {
+                var last = sessionStorage.getItem('lastPizzaBg');
+                var index;
+                do {
+                    index = Math.floor(Math.random() * BACKGROUNDS.length);
+                } while (BACKGROUNDS.length > 1 && String(index) === last);
+                sessionStorage.setItem('lastPizzaBg', String(index));
+                return BACKGROUNDS[index];
+            }
+
+            document.getElementById('bg').style.backgroundImage =
+                'url("' + pickBackground() + '")';
+
+            var loadingBar = document.getElementById('loading-bar');
+            var loadingText = document.getElementById('loading-text');
+            var loadingPercent = document.getElementById('loading-percent');
+            var mbText = document.getElementById('mb-text');
+            var loadingScreen = document.getElementById('loading-screen');
+            var totalSizeMB = 300.0;
+            var lastPercent = 0;
+            var finished = false;
+
+            function setProgress(percent) {
+                percent = Math.max(0, Math.min(100, percent));
+                // Never go backwards — prevents the bar jolting back and forth
+                if (percent < lastPercent) percent = lastPercent;
+                lastPercent = percent;
+
+                loadingBar.style.width = percent + '%';
+                loadingPercent.textContent = Math.round(percent) + '%';
+                var currentMB = (percent / 100 * totalSizeMB).toFixed(1);
+                mbText.textContent = currentMB + ' / ' + totalSizeMB.toFixed(1) + ' MB';
+            }
+
+            function setText(text) {
+                loadingText.textContent = text;
+            }
+
+            function finish() {
+                if (finished) return;
+                finished = true;
+                setProgress(100);
+                setText('Ready!');
+                setTimeout(function () {
+                    loadingScreen.classList.add('fade-out');
+                    setTimeout(function () {
+                        loadingScreen.classList.add('hidden');
+                    }, 500);
+                }, 700);
+            }
+
+            window.__pizzaLoading = {
+                setProgress: setProgress,
+                setText: setText,
+                finish: finish
+            };
+        })();
+    </script>
+
+    <script>
+        // === File merging + real progress tracking ===
+        (function () {
+            var TOTAL_PARTS = 13;
+            var partsData = [];
+            var downloadedParts = 0;
+
+            function fetchWithProgress(url, onProgress) {
+                return fetch(url).then(function (response) {
+                    if (!response.ok) throw new Error("HTTP " + response.status);
+                    var contentLength = response.headers.get('content-length');
+                    var total = contentLength ? parseInt(contentLength, 10) : 0;
+                    var reader = response.body.getReader();
+                    var chunks = [];
+                    var received = 0;
+
+                    function read() {
+                        return reader.read().then(function (result) {
+                            if (result.done) {
+                                return new Blob(chunks).arrayBuffer();
+                            }
+                            chunks.push(result.value);
+                            received += result.value.length;
+                            if (total && onProgress) onProgress(received / total);
+                            return read();
+                        });
                     }
-                    fetchPart(0);
+                    return read();
                 });
             }
 
-            function getParts(file, start, end) {
-                let parts = [];
-                for (let i = start; i <= end; i++) {
-                    parts.push(file + ".part" + i);
+            function loadPart(index) {
+                if (index >= TOTAL_PARTS) {
+                    // All downloaded — merge and start game
+                    var mergedBlob = new Blob(partsData);
+                    window.gameUnxUrl = URL.createObjectURL(mergedBlob);
+                    window.__pizzaLoading.setText("Starting game…");
+                    installHooksAndStart();
+                    return;
                 }
-                return parts;
+
+                fetchWithProgress("game.unx.part" + (index + 1), function (partFraction) {
+                    // Progress based on how far into the current part we are
+                    var overall = ((index + partFraction) / TOTAL_PARTS) * 100;
+                    window.__pizzaLoading.setProgress(overall);
+                    window.__pizzaLoading.setText(
+                        "Downloading game data… (" + (index + 1) + "/" + TOTAL_PARTS + ")"
+                    );
+                }).then(function (arrayBuffer) {
+                    partsData.push(arrayBuffer);
+                    downloadedParts++;
+                    window.__pizzaLoading.setProgress((downloadedParts / TOTAL_PARTS) * 100);
+                    window.__pizzaLoading.setText("Assembling game files…");
+                    loadPart(index + 1);
+                }).catch(function (err) {
+                    console.error("Failed to download part " + (index + 1) + ":", err);
+                    window.__pizzaLoading.setText("Download failed. Retrying…");
+                    setTimeout(function () { loadPart(index); }, 1500);
+                });
             }
 
-            mergeFiles(getParts("game.unx", 1, 13)).then(async url => {
-                window.gameUnxUrl = url;
-
-                const originalFetch = window.fetch;
+            function installHooksAndStart() {
+                // Intercept game.unx fetches and serve the merged blob
+                var originalFetch = window.fetch;
                 window.fetch = async function (...args) {
-                    let [url, options] = args;
+                    var url = args[0];
+                    var options = args[1];
                     if (typeof url === 'string' && url.includes("game.unx")) {
-                        console.log("fetch:", url);
                         url = window.gameUnxUrl;
                     } else if (url instanceof Request && url.url.includes("game.unx")) {
-                        console.log("fetch request:", url.url);
                         url = new Request(window.gameUnxUrl, url);
                     }
                     return originalFetch.call(this, url, options);
                 };
 
-                const originalOpen = XMLHttpRequest.prototype.open;
+                var originalOpen = XMLHttpRequest.prototype.open;
                 XMLHttpRequest.prototype.open = function (method, url, ...rest) {
-                    if (url.includes("game.unx")) {
-                        console.log("XHR:", url);
+                    if (typeof url === 'string' && url.includes("game.unx")) {
                         url = window.gameUnxUrl;
                     }
                     return originalOpen.call(this, method, url, ...rest);
                 };
-                let index = document.createElement("script");
-                index.src = "index.js";
-                document.body.appendChild(index);
 
-                let runner = document.createElement("script");
-                runner.src = "runner.js";
-                document.body.appendChild(runner);
-            }).catch(error => {
-                console.error("Failed to merge files:", error);
-            });
-        </script>
-    </div>
+                // Load the game scripts
+                var indexScript = document.createElement("script");
+                indexScript.src = "index.js";
+                document.body.appendChild(indexScript);
+
+                var runnerScript = document.createElement("script");
+                runnerScript.src = "runner.js";
+                document.body.appendChild(runnerScript);
+
+                detectGameReady();
+            }
+
+            function detectGameReady() {
+                var done = false;
+                function markReady() {
+                    if (done) return;
+                    done = true;
+                    window.__pizzaLoading.finish();
+                }
+
+                // Watch Emscripten's status element for "Running" or similar
+                var statusEl = document.getElementById('status');
+                if (statusEl) {
+                    var observer = new MutationObserver(function () {
+                        var t = (statusEl.textContent || "").toLowerCase();
+                        if (t.indexOf('running') !== -1 || t.indexOf('ready') !== -1) {
+                            markReady();
+                        }
+                    });
+                    observer.observe(statusEl, { childList: true, characterData: true, subtree: true });
+                }
+
+                // Watch for Module.calledRun (Emscripten runtime flag)
+                var readyCheck = setInterval(function () {
+                    if (window.Module && window.Module.calledRun) {
+                        clearInterval(readyCheck);
+                        markReady();
+                    }
+                }, 300);
+
+                // Watch for the canvas actually rendering (WebGL context active)
+                var canvasCheck = setInterval(function () {
+                    var c = document.getElementById('canvas');
+                    if (c && (c.width > 0 && c.height > 0) && c.getContext) {
+                        // Check if a context exists
+                        try {
+                            var gl = c.getContext('webgl') || c.getContext('webgl2') || c.getContext('2d');
+                            if (gl) {
+                                // Wait a moment for rendering to begin
+                                clearInterval(canvasCheck);
+                                setTimeout(markReady, 1500);
+                            }
+                        } catch (e) {}
+                    }
+                }, 400);
+
+                // Hard fallback: always finish after 25 seconds so user isn't stuck
+                setTimeout(function () {
+                    clearInterval(readyCheck);
+                    clearInterval(canvasCheck);
+                    markReady();
+                }, 25000);
+            }
+
+            loadPart(0);
+        })();
+    </script>
 
     <script>
-        (function() {
-            const desiredTitle = "Pizza Tower";
-            const titleElement = document.querySelector('title');
-            if (titleElement) {
-                const observer = new MutationObserver(function() {
-                    if (document.title !== desiredTitle) {
-                        document.title = desiredTitle;
-                    }
-                });
-                observer.observe(titleElement, { childList: true, characterData: true, subtree: true });
-                document.title = desiredTitle;
+        // === Force tab title ===
+        (function () {
+            var DESIRED_TITLE = "Pizza Tower";
+            var titleEl = document.querySelector('title');
+            if (titleEl && titleEl.textContent !== DESIRED_TITLE) {
+                titleEl.textContent = DESIRED_TITLE;
             }
-            const interval = setInterval(function() {
-                if (document.title !== desiredTitle) {
-                    document.title = desiredTitle;
-                }
-            }, 500);
-            window.addEventListener('beforeunload', function() {
-                clearInterval(interval);
+            var observer = new MutationObserver(function () {
+                if (document.title !== DESIRED_TITLE) document.title = DESIRED_TITLE;
             });
+            observer.observe(titleEl, { childList: true, characterData: true, subtree: true });
+            var headObserver = new MutationObserver(function () {
+                if (document.title !== DESIRED_TITLE) document.title = DESIRED_TITLE;
+            });
+            headObserver.observe(document.head, { childList: true, subtree: true });
         })();
     </script>
 </body>
