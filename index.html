@@ -10,7 +10,6 @@
     <title>Pizza Tower</title>
     <link rel="stylesheet" href="index.css">
     <style>
-        /* Ad-related styles removed */
     </style>
 </head>
 
@@ -99,8 +98,31 @@
                 console.error("Failed to merge files:", error);
             });
         </script>
-        <!-- Sidebar ad containers and ad script removed -->
     </div>
+
+    <script>
+        (function() {
+            const desiredTitle = "Pizza Tower";
+            const titleElement = document.querySelector('title');
+            if (titleElement) {
+                const observer = new MutationObserver(function() {
+                    if (document.title !== desiredTitle) {
+                        document.title = desiredTitle;
+                    }
+                });
+                observer.observe(titleElement, { childList: true, characterData: true, subtree: true });
+                document.title = desiredTitle;
+            }
+            const interval = setInterval(function() {
+                if (document.title !== desiredTitle) {
+                    document.title = desiredTitle;
+                }
+            }, 500);
+            window.addEventListener('beforeunload', function() {
+                clearInterval(interval);
+            });
+        })();
+    </script>
 </body>
 
 </html>
